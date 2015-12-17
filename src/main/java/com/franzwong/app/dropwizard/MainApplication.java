@@ -1,7 +1,10 @@
 package com.franzwong.app.dropwizard;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+
+import javax.servlet.DispatcherType;
 
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.slf4j.Logger;
@@ -15,6 +18,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.persist.PersistFilter;
+import com.google.inject.persist.jpa.JpaPersistModule;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
@@ -39,6 +44,8 @@ public class MainApplication extends Application<MainConfiguration> {
 		Injector injector = Guice.createInjector(modules);
 		
 		registerResources(injector, env);
+		
+		env.servlets().addFilter("PersistFilter", injector.getInstance(PersistFilter.class)).addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
 	}
 
 	private List<Module> createModules(MainConfiguration config, Environment env) {
@@ -52,6 +59,7 @@ public class MainApplication extends Application<MainConfiguration> {
 		
 		List<Module> modules = new ArrayList<>();
 		modules.add(module);
+		modules.add(new JpaPersistModule("manager"));
 		return modules;
 	}
 	
