@@ -3,6 +3,8 @@ package com.franzwong.app.dropwizard.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,14 +21,14 @@ import com.google.inject.persist.Transactional;
 
 @Path("/tasks")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class TaskResource {
 	
 	@Inject
 	private TaskRepository taskRepository;
 	
 	@GET
-	public Response getTasks(@QueryParam("userName") String userName) {
+	@Valid
+	public Response getTasks(@NotNull @QueryParam("userName") String userName) {
 		List<com.franzwong.app.dropwizard.data.Task> entities = taskRepository.findByUserName(userName);
 		
 		List<Task> tasks = entities.stream().map((entity) -> {
@@ -40,8 +42,10 @@ public class TaskResource {
 	}
 	
 	@POST
+	@Valid
 	@Transactional
-	public Response addTask(Task task) {
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response addTask(@NotNull Task task) {
 		com.franzwong.app.dropwizard.data.Task entity = new com.franzwong.app.dropwizard.data.Task();
 		entity.setContent(task.getContent());
 		entity.setUserName(task.getUserName());
